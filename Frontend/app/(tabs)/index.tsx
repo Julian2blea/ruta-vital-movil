@@ -176,7 +176,7 @@ export default function Home() {
           >
             <View style={styles.logoRow}>
               <View style={styles.logoDot} />
-              <Text style={styles.logoText}>Ruta Vital</Text>
+              <Text style={styles.logoText}>Mi Ruta Vital</Text>
             </View>
             <TouchableOpacity style={styles.avatarBtn}>
               <Ionicons name="person-circle-outline" size={36} color="white" />
