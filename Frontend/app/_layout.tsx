@@ -1,24 +1,50 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { useEffect } from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import { AuthProvider, useAuth } from '../context/AuthContext';
+import { ActivityIndicator, View } from 'react-native';
+ 
+function RootGuard() {
+  const { user, isLoading } = useAuth();
+  const segments = useSegments();
+  const router   = useRouter();
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
-
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
+  const segment = segments[0];
+  const inAuth  = segment === '(auth)';
+ 
+  useEffect(() => {
+    if (isLoading) return;
+ 
+    if (!user && !inAuth) {
+      router.replace('/(auth)/login');
+    } else if (user && inAuth) {
+      router.replace('/(tabs)');
+    }
+  }, [user, isLoading, segments, router]);
+ 
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#060D1F' }}>
+        <ActivityIndicator size="large" color="#34D399" />
+      </View>
+    );
+  }
+ 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)"  options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)"  options={{ headerShown: false }} />
+      <Stack.Screen name="result/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="result/chart"   options={{ headerShown: false }} />
+      <Stack.Screen name="result/reference" options={{ headerShown: false }} />
+      <Stack.Screen name="admin"   options={{ headerShown: false }} />
+    </Stack>
+  );
+}
+ 
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootGuard />
+    </AuthProvider>
   );
 }
