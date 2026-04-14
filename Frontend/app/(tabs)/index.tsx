@@ -79,7 +79,7 @@ export default function DashboardScreen() {
             )}
           </View>
           {isAdmin && (
-          <TouchableOpacity onPress={() => router.push('/(admin)' as any)}>
+          <TouchableOpacity onPress={() => router.push('/admin' as any)}>
             <View style={styles.adminBtn}>
               <Ionicons name="settings-outline" size={20} color="#FBBF24" />
             </View>

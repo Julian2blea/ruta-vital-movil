@@ -32,7 +32,6 @@ export async function getStoredUser(): Promise<any | null> {
   return raw ? JSON.parse(raw) : null;
 }
  
-// ─── Core fetch wrapper ───────────────────────────────────────
 async function request(
   endpoint: string,
   options: RequestInit = {}
