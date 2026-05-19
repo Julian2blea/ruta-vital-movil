@@ -1,19 +1,27 @@
 /**
  * AuthContext.tsx — Contexto global de autenticación
- * Maneja: sesión, rol del usuario, y control de acceso
+ * Maneja: sesión JWT, rol del usuario, renovación automática y logout forzado
  */
- 
+
 import {
   createContext, useContext, useEffect, useState, ReactNode
 } from 'react';
-import { auth, getStoredUser, getToken, removeToken, saveToken, saveUser } from '../services/api';
- 
+import {
+  auth,
+  getStoredUser,
+  getToken,
+  getRefreshToken,
+  removeToken,
+  saveTokens,
+  saveUser,
+} from '../services/api';
+
 // ─── Types ────────────────────────────────────────────────────
 export interface UserRole {
   id: number;
   description: string;
 }
- 
+
 export interface AppUser {
   id: number;
   login: string;
@@ -29,83 +37,97 @@ export interface AppUser {
   };
   roles: UserRole[];
 }
- 
+
 interface AuthContextType {
-  user: AppUser | null;
-  token: string | null;
-  isLoading: boolean;
-  isAdmin: boolean;
+  user:            AppUser | null;
+  token:           string | null;
+  isLoading:       boolean;
+  isAdmin:         boolean;
   isAuthenticated: boolean;
-  login: (login: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
+  login:           (login: string, password: string) => Promise<void>;
+  logout:          () => Promise<void>;
+  refreshUser:     () => Promise<void>;
 }
- 
+
 // ─── Context ──────────────────────────────────────────────────
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
- 
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser]       = useState<AppUser | null>(null);
-  const [token, setToken]     = useState<string | null>(null);
+  const [user,      setUser]      = useState<AppUser | null>(null);
+  const [token,     setToken]     = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = !!token;
- 
-  const isAdmin = user?.is_staff === true ||
+  const isAdmin =
+    user?.is_staff === true ||
     user?.roles?.some(r => r.description.toLowerCase() === 'admin') === true;
- 
-  // Load saved session on app start
+
+  // ── Carga sesión guardada al iniciar la app ────────────────
   useEffect(() => {
     (async () => {
       try {
-        const storedToken = await getToken();
-        const storedUser  = await getStoredUser();
-        if (storedToken && storedUser) {
-          setToken(storedToken);
+        const storedAccess = await getToken();
+        const storedUser   = await getStoredUser();
+        if (storedAccess && storedUser) {
+          setToken(storedAccess);
           setUser(storedUser);
         }
       } catch (_) {}
       finally { setIsLoading(false); }
     })();
   }, []);
- 
-  const login = async (loginVal: string, password: string) => {
-        try {
-        const data = await auth.login(loginVal, password);
-        await saveToken(data.token);
-        await saveUser(data.user);
-        setToken(data.token);
-        setUser(data.user);
-    } catch (error: any) {
-        throw error; 
-    }
 
+  // ── Login ─────────────────────────────────────────────────
+  const login = async (loginVal: string, password: string) => {
+    // api.ts devuelve { access, refresh, user }
+    const data = await auth.login(loginVal, password);
+
+    await saveTokens(data.access, data.refresh);
+    await saveUser(data.user);
+
+    setToken(data.access);
+    setUser(data.user);
   };
- 
+
+  // ── Logout ────────────────────────────────────────────────
   const logout = async () => {
-    try { await auth.logout(); } catch (_) {}
+    try {
+      const refresh = await getRefreshToken();
+      if (refresh) {
+        await auth.logout(refresh); 
+      }
+    } catch (_) {
+      
+    }
     await removeToken();
     setToken(null);
     setUser(null);
   };
- 
+
+  // ── Refresh user data ─────────────────────────────────────
   const refreshUser = async () => {
     try {
       const me = await auth.me();
       await saveUser(me);
       setUser(me);
-    } catch (_) {
-        await logout(); 
+    } catch (error: any) {
+      // Si es refresh expirado (lanzado por api.ts), forzar logout
+      if (error?.data?.refresh_expired) {
+        await logout();
+      }
     }
   };
- 
+
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, isAdmin, isAuthenticated, login, logout, refreshUser }}>
+    <AuthContext.Provider value={{
+      user, token, isLoading, isAdmin, isAuthenticated,
+      login, logout, refreshUser,
+    }}>
       {children}
     </AuthContext.Provider>
   );
 }
- 
+
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used inside AuthProvider');

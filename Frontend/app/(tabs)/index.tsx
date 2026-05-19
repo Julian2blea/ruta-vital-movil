@@ -123,6 +123,7 @@ export default function DashboardScreen() {
       {/* Quick actions */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Acciones rápidas</Text>
+
         <View style={styles.actionsGrid}>
           {[
             { icon: 'add-circle-outline', label: 'Registrar\nlectura',   route: '/reading',    color: '#34D399' },
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
   statLbl:        { color: '#64748B', fontSize: 12, marginTop: 2 },
   section:        { paddingHorizontal: 22, marginTop: 28 },
   sectionRow:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  sectionTitle:   { color: '#E2E8F0', fontSize: 16, fontWeight: '700' },
+  sectionTitle:   { color: '#E2E8F0', fontSize: 16, fontWeight: '700', marginBottom: 16 },
   seeAll:         { color: '#34D399', fontSize: 13 },
   actionsGrid:    { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   actionCard:     { width: '30%', backgroundColor: '#0F172A', borderRadius: 16, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1E293B' },

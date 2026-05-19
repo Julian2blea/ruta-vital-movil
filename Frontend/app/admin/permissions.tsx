@@ -23,7 +23,6 @@ export default function AdminPermissionsScreen() {
       .finally(() => setLoading(false));
   }, []);
  
-  // For each permission, find which roles have it
   const rolesForPermission = (permId: number) =>
     roles.filter(r => r.permissions?.some((p: any) => p.id === permId));
  
