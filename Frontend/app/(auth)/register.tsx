@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   inputIcon:    { paddingLeft: 14, paddingRight: 6 },
   input:        { flex: 1, color: 'white', fontSize: 15, paddingVertical: 13, paddingRight: 14 },
   btn:          { backgroundColor: '#34D399', borderRadius: 14, paddingVertical: 16, alignItems: 'center', marginTop: 6, marginBottom: 18 },
-  btnText:      { color: 'white', fontSize: 16, fontWeight: '700' },
+  btnText:      { color: 'white', fontSize: 16, fontWeight: '800', paddingHorizontal: 24, paddingVertical: 2 },
   loginRow:     { flexDirection: 'row', justifyContent: 'center' },
   loginText:    { color: '#64748B', fontSize: 14 },
   loginLink:    { color: '#34D399', fontSize: 14, fontWeight: '600' },

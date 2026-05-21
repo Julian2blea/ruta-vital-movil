@@ -5,14 +5,14 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const BASE_URL = 'http://10.52.241.124:8000/api';
+export const BASE_URL = 'http://10.189.244.124:8000/api';
 
-// ─── Claves de almacenamiento ─────────────────────────────────
+//  Claves de almacenamiento 
 const ACCESS_TOKEN_KEY  = 'ruta_vital_access';
 const REFRESH_TOKEN_KEY = 'ruta_vital_refresh';
 const USER_KEY          = 'ruta_vital_user';
 
-// ─── Helpers de AsyncStorage ──────────────────────────────────
+//  Helpers de AsyncStorage 
 export async function saveTokens(access: string, refresh: string) {
   await AsyncStorage.multiSet([
     [ACCESS_TOKEN_KEY,  access],
@@ -56,7 +56,7 @@ async function renewAccessToken(): Promise<string> {
   });
 
   if (!response.ok) {
-    // Refresh expirado o inválido → forzar logout
+    
     throw new Error('REFRESH_EXPIRED');
   }
 
@@ -64,14 +64,14 @@ async function renewAccessToken(): Promise<string> {
 
   
   const newAccess  = data.access;
-  const newRefresh = data.refresh ?? refresh; // fallback si no rota
+  const newRefresh = data.refresh ?? refresh; 
 
   await saveTokens(newAccess, newRefresh);
 
   return newAccess;
 }
 
-// ─── Petición central con interceptor 401 ────────────────────
+// 
 async function request(
   endpoint: string,
   options: RequestInit = {},
@@ -93,14 +93,14 @@ async function request(
     headers,
   });
 
-  // ── Interceptor 401 ──────────────────────────────────────
+  // Interceptor 401 
   if (response.status === 401 && !isRetry) {
     try {
       await renewAccessToken();
-      // Reintenta la misma petición con el token nuevo (isRetry=true)
+      
       return request(endpoint, options, true);
     } catch (refreshError: any) {
-      // Refresh también falló → sesión muerta
+      
       throw {
         status: 401,
         data: { refresh_expired: true },
@@ -118,7 +118,7 @@ async function request(
   return response.json();
 }
 
-// ─── AUTH ─────────────────────────────────────────────────────
+
 export const auth = {
   login: (login: string, password: string) =>
     request('/auth/login/', {
@@ -147,7 +147,7 @@ export const auth = {
   me: () => request('/users/me/'),
 };
 
-// ─── GLUCOSE READINGS ─────────────────────────────────────────
+
 export const glucose = {
   create: (data: {
     glucose_value: number;
@@ -165,7 +165,7 @@ export const glucose = {
   myReadings: ()        => request('/readings/my_readings/'),
 };
 
-// ─── PROFILE ──────────────────────────────────────────────────
+
 export const profile = {
   update: (personId: number, data: {
     first_name?: string;
@@ -181,7 +181,7 @@ export const profile = {
     }),
 };
 
-// ─── ADMIN ────────────────────────────────────────────────────
+
 export const admin = {
   listUsers:       () => request('/users/'),
   listRoles:       () => request('/roles/'),

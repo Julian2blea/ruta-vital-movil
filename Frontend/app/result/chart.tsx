@@ -60,7 +60,7 @@ const formatDate = (iso: string) => {
 const sameDay = (isoA: string, dayStr: string) =>
   isoA.slice(0, 10) === dayStr;
  
-// ─── Componente principal ─────────────────────────────────────────
+
 export default function ChartScreen() {
   const router              = useRouter();
   const { user, isLoading } = useAuth();
@@ -70,6 +70,7 @@ export default function ChartScreen() {
   const [tab, setTab]                 = useState<'hourly' | 'daily'>('hourly');
   const [dayRange, setDayRange]       = useState<7|14|30>(7);
   const [selectedDay, setSelectedDay] = useState<string>(''); // formato YYYY-MM-DD
+  const [showReadingsList, setShowReadingsList] = useState(false);
  
   useEffect(() => {
     if (!isLoading && !user) router.replace('/(auth)/login');
@@ -103,7 +104,7 @@ export default function ChartScreen() {
     .filter(r => sameDay(r.reading_date, selectedDay))
     .sort((a, b) => new Date(a.reading_date).getTime() - new Date(b.reading_date).getTime());
  
-  // Días únicos (últimos 14 con lecturas)
+  
   const uniqueDays = [...new Set(readings.map(r => r.reading_date.slice(0, 10)))]
     .sort((a, b) => b.localeCompare(a))
     .slice(0, 14);
@@ -145,7 +146,7 @@ export default function ChartScreen() {
   const pct      = values.length ? Math.round((inRange/values.length)*100) : 0;
   const maxVal   = Math.max(...values, 250);
  
-  // ── Render ────────────────────────────────────────────────────
+  
   return (
     <ScrollView
       style={styles.container}
@@ -161,7 +162,7 @@ export default function ChartScreen() {
         <View style={{ width: 22 }} />
       </View>
  
-      {/* Tab selector */}
+      
       <View style={styles.tabRow}>
         <TouchableOpacity
           style={[styles.tab, tab === 'hourly' && styles.tabActive]}
@@ -179,7 +180,7 @@ export default function ChartScreen() {
         </TouchableOpacity>
       </View>
  
-      {/* ─── VISTA POR HORAS ─────────────────────────────────── */}
+      {/*  VISTA POR HORAS  */}
       {tab === 'hourly' && (
         <>
           <View style={styles.sectionHeader}>
@@ -231,7 +232,7 @@ export default function ChartScreen() {
             </View>
           ) : (
             <>
-              {/* Resumen del día */}
+              
               <View style={styles.daySummaryRow}>
                 {(() => {
                   const dv    = dayReadings.map(r => r.glucose_value);
@@ -253,13 +254,13 @@ export default function ChartScreen() {
                 })()}
               </View>
  
-              {/* Gráfica de línea  */}
+              
               <View style={styles.chartCard}>
                 <Text style={styles.chartCardTitle}>
                   Evolución del {formatDate(selectedDay + 'T12:00:00')} por hora
                 </Text>
  
-                {/* FIX #3: Etiquetas de zona SIN fondo de color */}
+                
                 <View style={styles.zoneLabels}>
                   <Text style={[styles.zoneLabel, { color: C.high_glucose }]}>Alto ≥140</Text>
                   <Text style={[styles.zoneLabel, { color: C.normal }]}>Normal 70–139</Text>
@@ -350,34 +351,52 @@ export default function ChartScreen() {
               </View>
  
               {/* Lista de lecturas del día */}
-              <View style={styles.sectionHeader}>
-                <Ionicons name="list-outline" size={14} color={C.subtle} />
-                <Text style={styles.sectionLabel}>Lecturas del día ({dayReadings.length})</Text>
-              </View>
-              {dayReadings.map((r, i) => {
-                const st  = r.status ?? classifyValue(r.glucose_value, r.context);
-                const col = statusColor(st);
-                return (
-                  <View key={i} style={styles.readingRow}>
-                    <View style={[styles.readingDot, { backgroundColor: col }]} />
-                    <Text style={styles.readingHour}>{formatHour(r.reading_date)}</Text>
-                    <Text style={[styles.readingVal, { color: col }]}>
-                      {r.glucose_value} mg/dL
-                    </Text>
-                    <View style={[styles.readingBadge, { backgroundColor: col + '20' }]}>
-                      <Text style={[styles.readingBadgeText, { color: col }]}>
-                        {STATUS_LABEL[st]}
-                      </Text>
-                    </View>
-                  </View>
-                );
-              })}
+              <TouchableOpacity
+                style={styles.toggleReadingsButton}
+                onPress={() => setShowReadingsList(!showReadingsList)}
+                activeOpacity={0.7}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Ionicons name="list-outline" size={18} color={C.subtle} />
+                  <Text style={styles.toggleReadingsText}>
+                    {showReadingsList ? "Ocultar" : "Mostrar"} lecturas del día ({dayReadings.length})
+                  </Text>
+                </View>
+                <Ionicons
+                  name={showReadingsList ? "chevron-up-outline" : "chevron-down-outline"}
+                  size={18}
+                  color={C.normal}
+                />
+              </TouchableOpacity>
+ 
+              {showReadingsList && (
+                <View style={styles.readingsListContainer}>
+                  {dayReadings.map((r, i) => {
+                    const st  = r.status ?? classifyValue(r.glucose_value, r.context);
+                    const col = statusColor(st);
+                    return (
+                      <View key={i} style={styles.readingRow}>
+                        <View style={[styles.readingDot, { backgroundColor: col }]} />
+                        <Text style={styles.readingHour}>{formatHour(r.reading_date)}</Text>
+                        <Text style={[styles.readingVal, { color: col }]}>
+                          {r.glucose_value} mg/dL
+                        </Text>
+                        <View style={[styles.readingBadge, { backgroundColor: col + '20' }]}>
+                          <Text style={[styles.readingBadgeText, { color: col }]}>
+                            {STATUS_LABEL[st]}
+                          </Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
             </>
           )}
         </>
       )}
  
-      {/* ─── VISTA POR DÍAS ──────────────────────────────────── */}
+      {/* VISTA POR DÍAS */}
       {tab === 'daily' && (
         <>
           <View style={styles.rangePills}>
@@ -572,4 +591,9 @@ const styles = StyleSheet.create({
   emptyBtnText:        { color: 'white', fontWeight: '700' },
  
   disclaimer:          { color: '#334155', fontSize: 11, textAlign: 'center', marginTop: 8, lineHeight: 17 },
+
+  toggleReadingsButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: C.surface, borderWidth: 1,
+                        borderColor: C.border, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 16, marginBottom: 8, marginTop: 4,},
+  toggleReadingsText:   { color: C.text, fontSize: 14, fontWeight: '600', },
+  readingsListContainer: { marginTop: 4, },
 });

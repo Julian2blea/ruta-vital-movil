@@ -16,7 +16,7 @@ import {
   saveUser,
 } from '../services/api';
 
-// ─── Types ────────────────────────────────────────────────────
+
 export interface UserRole {
   id: number;
   description: string;
@@ -49,7 +49,7 @@ interface AuthContextType {
   refreshUser:     () => Promise<void>;
 }
 
-// ─── Context ──────────────────────────────────────────────────
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user?.is_staff === true ||
     user?.roles?.some(r => r.description.toLowerCase() === 'admin') === true;
 
-  // ── Carga sesión guardada al iniciar la app ────────────────
+  
   useEffect(() => {
     (async () => {
       try {
@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  // ── Login ─────────────────────────────────────────────────
+ 
   const login = async (loginVal: string, password: string) => {
     // api.ts devuelve { access, refresh, user }
     const data = await auth.login(loginVal, password);
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(data.user);
   };
 
-  // ── Logout ────────────────────────────────────────────────
+
   const logout = async () => {
     try {
       const refresh = await getRefreshToken();
@@ -104,14 +104,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  // ── Refresh user data ─────────────────────────────────────
+
   const refreshUser = async () => {
     try {
       const me = await auth.me();
       await saveUser(me);
       setUser(me);
     } catch (error: any) {
-      // Si es refresh expirado (lanzado por api.ts), forzar logout
+      
       if (error?.data?.refresh_expired) {
         await logout();
       }

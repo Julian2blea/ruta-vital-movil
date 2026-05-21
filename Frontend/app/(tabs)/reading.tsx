@@ -162,7 +162,7 @@ export default function ReadingScreen() {
           onChangeText={setNotes}
         />
 
-        {/* REFERENCIA */}
+        {/* REFERENCIA 
         <Text style={styles.sectionTitle}>Valores de referencia *</Text>
         <View style={styles.refTable}>
           {REF.map(r => (
@@ -175,7 +175,7 @@ export default function ReadingScreen() {
           <Text style={styles.refNote}>
             * Valores en ayunas. Rangos postprandiales difieren.
           </Text>
-        </View>
+        </View> */}
 
         {/* BOTÓN */}
         <TouchableOpacity

@@ -87,7 +87,7 @@ export default function DashboardScreen() {
         )}
         </View>
 
-        {/* Latest reading */}
+        
         {latest ? (
           <View style={styles.latestCard}>
             <Text style={styles.latestLabel}>Última lectura</Text>
@@ -103,7 +103,7 @@ export default function DashboardScreen() {
           </View>
         )}
 
-        {/* Stats */}
+        
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
             <Text style={styles.statVal}>{total}</Text>
@@ -120,7 +120,7 @@ export default function DashboardScreen() {
         </View>
       </LinearGradient>
 
-      {/* Quick actions */}
+      
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Acciones rápidas</Text>
 
@@ -143,7 +143,7 @@ export default function DashboardScreen() {
         </View>
       </View>
 
-      {/* Recent readings */}
+      
       {readings.length > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionRow}>
