@@ -5,7 +5,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const BASE_URL = 'http://10.189.244.124:8000/api';
+export const BASE_URL = 'https://ruta-viatl-api-fbayadbtdxgaf4ga.brazilsouth-01.azurewebsites.net/api';
 
 //  Claves de almacenamiento 
 const ACCESS_TOKEN_KEY  = 'ruta_vital_access';
